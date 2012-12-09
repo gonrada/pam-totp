@@ -78,8 +78,8 @@ uint32_t dynamic_truncation(const unsigned char *input, int length)
 	uint32_t bin_code;
 	unsigned char offset;
 
-	offset = input[length - 1] & 0x34; /* Assume 64 bytes; thus we want the low 6 bits */
-	offset = offset % 59; /* Again, assume 64 of input */
+	offset = input[length - 1] & 0x3F; /* Assume 64 bytes; thus we want the low 6 bits */
+	offset = offset % MAX_OFFSET; /* Again, assume 64 of input */
 
 	/* RFC4226; Page 7-8;
 	 */    

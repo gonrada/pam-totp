@@ -55,7 +55,7 @@
 #define KEY_FILE "/etc/totp.key"
 #define DIGITS 7
 #define PERIOD 30
-
+#define MAX_OFFSET (length-5)
 
 /**
  *
