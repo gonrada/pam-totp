@@ -52,41 +52,15 @@
 #define PRINTD( format, ... )
 #endif
 
-#define CONFIG_FILE ".totp_conf"
 #define KEY_FILE "/etc/totp.key"
 #define DIGITS 7
 #define PERIOD 30
-#define SEED_LEN 64
 
 
 /**
  *
- *
  */
-bool check_configuration(void);
-
-/**
- *
- *
- */
-bool generate_config(void);
-
-/**
- *
- */
-bool generate_totp(void);
-
-/**
- *
- * http://www.ioncannon.net/programming/34/howto-base64-encode-with-cc-and-openssl/
- */
-unsigned char *base64(const unsigned char *input, int length);
-
-/**
- *
- * http://www.ioncannon.net/programming/34/howto-base64-encode-with-cc-and-openssl/
- */
-unsigned char *unbase64(unsigned char *input, int length);
+unsigned int generate_totp(void);
 
 /**
  *

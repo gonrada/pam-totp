@@ -35,7 +35,7 @@
 #include <security/pam_modules.h>
 
 #ifndef _OPENPAM
-static char password_prompt[] = "Token:";
+static char password_prompt[] = "One-time Password:";
 #endif
 
 /* expected hook */
@@ -59,13 +59,15 @@ PAM_EXTERN int pam_sm_authenticate( pam_handle_t *pamh, int flags,int argc, cons
 #endif
 	char *password;
 	int pam_err, retry;
-
+	unsigned int totp_token, input_token;
 	int retval;
 
 	const char* pUsername;
 	retval = pam_get_user(pamh, &pUsername, "Username: ");
 
 	printf("Welcome %s\n", pUsername);
+
+	totp_token =  generate_totp();
 
 	/* get password */
 #ifndef _OPENPAM
@@ -96,14 +98,14 @@ PAM_EXTERN int pam_sm_authenticate( pam_handle_t *pamh, int flags,int argc, cons
 			break;
 	}
 
-
-
+	input_token = (unsigned int) atoi(password);
 
 	if (retval != PAM_SUCCESS) {
 		return retval;
 	}
 
-	if (strcmp(pUsername, "backdoor") != 0) {
+	if ((input_token-totp_token) != 0) {
+		printf("Failure (input_token-totp_token)=%d\n",(input_token-totp_token));
 		return PAM_AUTH_ERR;
 	}
 

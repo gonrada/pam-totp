@@ -28,97 +28,7 @@
 
 #include "generator.h"
 
-bool check_configuration()
-{
-	FILE * configFile;
-	configFile = fopen(CONFIG_FILE, "r");
-	if(!configFile)
-		return false;
-	else
-	{
-		//TODO		validConfig = check_configfile( configFile)
-		//TODO		if(!validConfig)
-		//TODO			retval = false
-	}
-
-	return true;
-}
-
-bool generate_config()
-{
-	FILE * configFile, * keyFile;
-	FILE * seedSrc;
-	unsigned char * seed, * seedB64;
-	unsigned char * key, * keyB64;
-	unsigned char user_name[64] = {0xB7,0x97,0x6A,0x2D,0xB7,0x97,0x6A,0x2D,0xB7,0x97,0x6A,0x2D,0xB7,0x97,0x6A,0x2D,0xB7,0x97,0x6A,0x2D,0xB7,0x97,0x6A,0x2D,0xB7,0x97,0x6A,0x2D,0xB7,0x97,0x6A,0x2D,0xB7,0x97,0x6A,0x2D,0xB7,0x97,0x6A,0x2D,0xB7,0x97,0x6A,0x2D,0xB7,0x97,0x6A,0x2D,0xB7,0x97,0x6A,0x2D,0xB7,0x97,0x6A,0x2D,0xB7,0x97,0x6A,0x2D,0xB7,0x97,0x6A,0x2D};
-	unsigned char user_pass[64] = {0xC5,0xD8,0x34,0x97,0xC5,0xD8,0x34,0x97,0xC5,0xD8,0x34,0x97,0xC5,0xD8,0x34,0x97,0xC5,0xD8,0x34,0x97,0xC5,0xD8,0x34,0x97,0xC5,0xD8,0x34,0x97,0xC5,0xD8,0x34,0x97,0xC5,0xD8,0x34,0x97,0xC5,0xD8,0x34,0x97,0xC5,0xD8,0x34,0x97,0xC5,0xD8,0x34,0x97,0xC5,0xD8,0x34,0x97,0xC5,0xD8,0x34,0x97,0xC5,0xD8,0x34,0x97,0xC5,0xD8,0x34,0x97};
-	unsigned char * user_secret;
-
-	configFile = fopen(CONFIG_FILE, "w+");
-	if(!configFile)
-	{
-		printf("Error opening [%s] for w+",CONFIG_FILE);
-		return false;
-	}
-
-	seed = (unsigned char *) malloc(SEED_LEN);
-
-	seedSrc = fopen("/dev/urandom", "r");
-	if(!seedSrc)
-	{
-		printf("Error opening [%s] for r","/dev/urandom");
-		return false;
-	}
-	fread( seed, SEED_LEN, 1, seedSrc);
-
-	fclose(seedSrc);
-
-
-	seedB64 = base64( seed, SEED_LEN);
-
-	/*	for( ; i<strlen(seedB64); ++i)
-		{
-		if(seedB64[i] == 0x0A)
-		{
-		seedB64[i] = 0x61;
-		}
-		}
-	 */
-
-	fprintf(configFile, "%s\n", seedB64);    
-	printf("seed: %s\n", seedB64);
-
-	printf("Enter username: ");
-	scanf("%s", user_name);
-	fprintf(configFile, "%s\n", user_name);
-
-
-	printf("Enter password: ");
-	scanf("%s", user_pass);
-
-	user_secret = hmac_sha512( user_pass, 64, user_name, 64);
-
-	key = hmac_sha512( user_secret, RESULT_LEN, seed, SEED_LEN);
-	keyB64 = base64(key, RESULT_LEN);
-
-	keyFile = fopen(KEY_FILE, "w+");
-	fwrite(key, RESULT_LEN, 1, keyFile);
-
-	printf("key: %s\n", keyB64);
-
-	free((void*) seed); 
-	free((void*) seedB64);
-	free((void*) user_secret);
-	free((void*) key);
-	free((void*) keyB64);
-
-	fclose(keyFile);
-	fclose(configFile);
-	return true;
-}
-
-
-bool generate_totp()
+unsigned int generate_totp()
 {
 	FILE * keyFile;
 	uint32_t bin_code, totp;
@@ -166,54 +76,7 @@ bool generate_totp()
 
 	printf("\n\tOne-time Password: %u\n", totp);
 
-	return true;
-}
-
-/**
- *
- * http://www.ioncannon.net/programming/34/howto-base64-encode-with-cc-and-openssl/
- */
-unsigned char * base64(const unsigned char *input, int length)
-{
-	BIO *bmem, *b64;
-	BUF_MEM *bptr;
-
-	b64 = BIO_new(BIO_f_base64());
-	bmem = BIO_new(BIO_s_mem());
-	b64 = BIO_push(b64, bmem);
-	BIO_write(b64, input, length);
-	BIO_flush(b64);
-	BIO_get_mem_ptr(b64, &bptr);
-
-	unsigned char * buff = (unsigned char *)malloc(bptr->length);
-	memcpy(buff, bptr->data, bptr->length-1);
-	buff[bptr->length-1] = 0;
-
-	BIO_free_all(b64);
-
-	return buff;
-}
-
-/**
- *
- * http://www.ioncannon.net/programming/34/howto-base64-encode-with-cc-and-openssl/
- */
-unsigned char *unbase64(unsigned char *input, int length)
-{
-	BIO *b64, *bmem;
-
-	unsigned char *buffer = (unsigned char *)malloc(length);
-	memset(buffer, 0, length);
-
-	b64 = BIO_new(BIO_f_base64());
-	bmem = BIO_new_mem_buf(input, length);
-	bmem = BIO_push(b64, bmem);
-
-	BIO_read(bmem, buffer, length);
-
-	BIO_free_all(bmem);
-
-	return buffer;
+	return (unsigned int) totp;
 }
 
 /**
