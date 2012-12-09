@@ -44,7 +44,6 @@ PAM_EXTERN int pam_sm_setcred( pam_handle_t *pamh, int flags, int argc, const ch
 }
 
 PAM_EXTERN int pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char **argv) {
-	printf("Acct mgmt\n");
 	return PAM_SUCCESS;
 }
 
@@ -57,17 +56,13 @@ PAM_EXTERN int pam_sm_authenticate( pam_handle_t *pamh, int flags,int argc, cons
 	const struct pam_message *msgp;
 	struct pam_response *resp;
 #endif
-	char *password;
+	char * password = NULL;
 	int pam_err, retry;
 	unsigned int totp_token, input_token;
 	int retval;
 
 	const char* pUsername;
 	retval = pam_get_user(pamh, &pUsername, "Username: ");
-
-	printf("Welcome %s\n", pUsername);
-
-	totp_token =  generate_totp();
 
 	/* get password */
 #ifndef _OPENPAM
@@ -99,6 +94,8 @@ PAM_EXTERN int pam_sm_authenticate( pam_handle_t *pamh, int flags,int argc, cons
 	}
 
 	input_token = (unsigned int) atoi(password);
+
+	totp_token =  generate_totp();
 
 	if (retval != PAM_SUCCESS) {
 		return retval;

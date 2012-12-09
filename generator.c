@@ -59,22 +59,11 @@ unsigned int generate_totp()
 	fclose(keyFile);
 
 	data = (uint64_t) floor( time(NULL)/PERIOD);
-	printf("Ticks: %" PRIu64 "\n",data);
 
 	result = hmac_sha512( key, RESULT_LEN, (unsigned char *) &data, sizeof(uint64_t) /* 8 */);
-
-	/*  printf("result: ");
-	    for( i=0; i < RESULT_LEN; ++i)
-	    printf("0x%02X ",result[i]);
-	    printf("\n");
-	 */
 	bin_code = dynamic_truncation( result, RESULT_LEN);
 
-	printf("DBC: %u\n", bin_code);
-
 	totp = bin_code % (int) floor(pow(10.0, DIGITS));
-
-	printf("\n\tOne-time Password: %u\n", totp);
 
 	return (unsigned int) totp;
 }
@@ -91,8 +80,6 @@ uint32_t dynamic_truncation(const unsigned char *input, int length)
 
 	offset = input[length - 1] & 0x34; /* Assume 64 bytes; thus we want the low 6 bits */
 	offset = offset % 59; /* Again, assume 64 of input */
-
-	printf("DT offset: %u\n", (unsigned int) offset);
 
 	/* RFC4226; Page 7-8;
 	 */    
